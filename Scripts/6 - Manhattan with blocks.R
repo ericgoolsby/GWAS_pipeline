@@ -2,6 +2,7 @@
 library(tidyverse)
 library(data.table)
 library(RColorBrewer)
+library(ggplot2)
 library(ggpubr)
 
 #### read in preferences
@@ -47,7 +48,7 @@ colocate<- colocate %>% group_by(chromosome) %>% mutate(region_col=colours[as.nu
 ###setup the data
 
   envs<-as.character(read.table("environments_to_run.txt")[,1])
-  traits<-as.character(read.table("traits_to_run.txt")[,1])
+  traits<- as.character(unlist(as.list(read.csv(paste0("data/",trait_filename) , nrows=1, header = F)[-1])))
   
   suggthresh<-0.001 ## draw line at "suggestive" SNPs (threshold fraction of snips are above the blue line)
 
@@ -65,7 +66,7 @@ for (i in 1:length(traits)){
     } ### deal with missing association file
     
     # pdf(paste("Plots/Manhattans/single_env/",traits[i],"-",envs[q],"_ManhattanPlot.pdf",sep=""),height=5.5,width=7.5)
-    label<-paste(traits[i],envs[q])
+    label<-paste(traits[i])
     print(label)
     snips<-fread(paste("Tables/Assoc_files/",paste(traits[i],envs[q],sep="_"),".assoc.txt",sep=""),header=T)
     snips$CHR<- as.integer(gsub("Ha412HOChr","",snips$chr))
@@ -110,11 +111,11 @@ for (i in 1:length(traits)){
     # highlights<-highlights %>% group_by(chromosome) %>% mutate(region_col=colours[as.numeric(factor(rank(match(region,levels(region)))))])
     highlights$region_col<-colocate$region_col[match(highlights$region,colocate$region)]
     
-    
+  
     plot<-ggplot(data=snips, aes(x=BPcum, y=-log10(p_wald),color=as.factor(CHR)))+
       geom_point(size=0.4)+scale_color_manual(values=rep(c("grey75",brewer.pal("Blues",n=9)[3]),17))+
       annotate("point",x=highlights$BPcum,y=-log10(highlights$p_wald),col=highlights$region_col,size=0.6)+
-      scale_x_continuous( label = axisdf$CHR, breaks= axisdf$center, expand = expand_scale(mult = c(0.02, 0.02))) +
+      scale_x_continuous( labels = axisdf$CHR, breaks= axisdf$center, expand = expand_scale(mult = c(0.02, 0.02))) +
       scale_y_continuous(expand = c(0, 0), limits=c(1,ytop), breaks=seq(from=2, to=ytop,by=2) )+
       theme_light() +
       theme( 
@@ -127,11 +128,29 @@ for (i in 1:length(traits)){
       geom_hline(yintercept=tmpcutoff,col="blue")+
       ggtitle(label)
     
-    ggsave(paste("Plots/Manhattans_regionhighlight/single_env/",traits[i],"_",envs[q],".png",sep=""),plot, height=4.5,width=7.5, units="in",dpi=300)
+   # ggsave(paste("Plots/Manhattans_regionhighlight/single_env/",traits[i],"_",envs[q],".png",sep=""),plot, height=4.5,width=7.5, units="in",dpi=300)
   
+    #png(paste("Plots/Manhattans_regionhighlight/single_env/",traits[i],"_",envs[q],".png",sep=""),height=4.5,width=7.5, units = "in",res = 300)
+   pdf(paste("Plots/Manhattans_regionhighlight/single_env/",traits[i],"_",envs[q],".pdf",sep=""),height=4.5,width=7.5)
+     print(plot)
+    dev.off()
+    
     assign(envs[q],plot)
   }
+  if(length(envs) > 1){
+  #this should be fixed if there are more than 3 environments
+    comb.plot.list<-mget(paste(envs[1:length(envs)]))
+    
+    comb.plot<-plot_grid(plotlist = comb.plot.list,align="h",nrow=2)
   
-  comb.plot<-plot_grid(Wet,logdiff,Dry,align="h",nrow=2)
-  ggsave(paste("Plots/Manhattans_regionhighlight/Manhattan-region-",traits[i],".png",sep=""),plot=comb.plot,height=9,width=15, units="in",dpi=300)
+  #ggsave(paste("Plots/Manhattans_regionhighlight/Manhattan-region-",traits[i],".png",sep=""),plot=comb.plot,height=9,width=15, units="in",dpi=300)
+  pdf(paste("Plots/Manhattans_regionhighlight/Manhattan-region-",traits[i],".png",sep=""),height=4.5,width=7.5)
+  print(comb.plot)
+  dev.off()
+  
+  }
 }
+  
+  
+
+  

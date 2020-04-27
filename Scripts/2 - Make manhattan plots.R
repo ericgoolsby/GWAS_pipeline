@@ -13,7 +13,8 @@ prefs<-read.table("Scripts/### Preferences ###",header=F,sep="=",skip=1)
 ###setup the data
 
 envs<-as.character(read.table("environments_to_run.txt")[,1])
-traits<-as.character(read.table("traits_to_run.txt")[,1])
+traits<- as.character(unlist(as.list(read.csv(paste0("data/",trait_filename) , nrows=1, header = F)[-1])))
+
 
 
 suggthresh<-0.001 ## draw line at "suggestive" SNPs (threshold fraction of snips are above the blue line)
@@ -50,7 +51,7 @@ for (i in 1:length(traits)){
       
       tmpcutoff <- as.data.frame(quantile(ps1$p_wald,as.numeric(as.character(suggthresh)),na.rm=T))[1,1]
       
-      label<-paste(traits[i],envs[q])
+      label<-paste(traits[i],envs[q],sep = "_")
       print(label)
 
       if (length(ps1[ps1$p_wald<0.01,]$p_wald)<1) {plot(10:1)  ## draw empty plot if no snips are above minimum plotting threshold, plot fails otherwise
@@ -62,7 +63,7 @@ for (i in 1:length(traits)){
       }
     mtext(label, outer = TRUE, cex = 1)
     dev.off()
-      # }
+       }
 
-}
+
 

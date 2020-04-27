@@ -62,7 +62,7 @@ chrom.borders<-chrom.borders[1:length(chrom.borders)-1]
 colocate<-colocate[!duplicated(paste(colocate$region,colocate$trait_env)),]
 
 
-for (i in 1: length(envs)) {
+for (i in 1:length(envs)) {
   q<-i
 
 plot.data<-as.data.frame(colocate[colocate$env==envs[i],])
@@ -99,7 +99,11 @@ comb.plot<-plot_grid(Env.dendro+theme(plot.margin = unit(c(0, 0, 0, 0), "cm")),
 
 trait.to.region.ratio<-length(levels(plot.data$region))/length(Env.label.order)
 
-ggsave(paste("Plots/Colocalization/colocate-",envs[i],".pdf",sep=""),plot=comb.plot,width=22,height=6)
+#ggsave(paste("Plots/Colocalization/colocate-",envs[i],".pdf",sep=""),plot=comb.plot,width=22,height=6)
+pdf(paste("Plots/Colocalization/colocate-",envs[i],".png",sep=""),width=22,height=6)
+comb.plot
+dev.off()
+
 
 }
 

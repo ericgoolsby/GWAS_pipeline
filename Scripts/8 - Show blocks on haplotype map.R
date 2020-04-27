@@ -84,4 +84,10 @@ blockmap<-plotbase+theme_minimal()+
   theme(axis.text.x = element_text(angle=20,hjust=1),
         axis.text.y = element_blank(),axis.title.y = element_blank())+xlab("Base position")
 
-ggsave("Plots/Colocalization/regions_on_blockmap.pdf",blockmap, width=14.24, height=7.6)
+#ggsave("Plots/Colocalization/regions_on_blockmap.pdf",blockmap, width=14.24, height=7.6)
+
+pdf("Plots/Colocalization/regions_on_blockmap.pdf", width=14.24, height=7.6)
+blockmap
+dev.off()
+
+

@@ -169,7 +169,16 @@ genes.plot<-plotbase+geom_point(shape=21,col="gray",size=2)+
   scale_fill_manual(values=colours,name="Chromosome")+
   xlab("significant region")+ylab("Number of genes (log10)")
 
-genes.plot
+#genes.plot
 
-ggsave("Plots/Colocalization/nr_genes.pdf",genes.plot, width=18, height=10)
+#ggsave("Plots/Colocalization/nr_genes.pdf",genes.plot, width=18, height=10)
+
+pdf("Plots/Colocalization/nr_genes.pdf", width=18, height=10)
+genes.plot
+dev.off()
+
+
+
+
+
 write.csv(gene.count,"Tables/Genes/genecount.csv")

@@ -13,9 +13,12 @@ prefs<-read.table("Scripts/### Preferences ###",header=F,sep="=",skip=1)
 
 
 ## Read in traits and environments to run
-envs<-as.character(read.table("environments_to_run.txt")[,1])
-traits<-as.character(read.table("traits_to_run.txt")[,1])
+traits<- as.character(read.table("traits_to_run.txt")[,1])
 
+envs<-as.character(read.table("environments_to_run.txt")[,1])
+
+
+#create directories as necessary
 pheno.data<-fread(paste("data/",pheno.name,sep=""))
 dir.create("Plots/")
 dir.create("Plots/Colocalization/")
@@ -29,6 +32,9 @@ dir.create(("Tables/Blocks/"))
 dir.create(("Tables/Genes/"))
 
 setwd("Software")
+
+
+#uncomment for loop if you have comparison of environment
 for (i in 1:length(envs)){
   
   env<-envs[i]
@@ -36,15 +42,22 @@ for (i in 1:length(envs)){
   for (q in 1:length(traits)) {
     
     trait<-traits[q]
-    print(paste(trait,env,sep="_"))
+    print(paste(trait,env))
 
+#select_cols = c("SAM", paste(trait))
 select_cols = c("SAM", paste(trait,env,sep="_"))
+
+
+
 
 if (!select_cols[2]%in%names(pheno.data)) { 
   print("phenotype missing")
   next } #if the phenotype does not exist go to the next one
 
-trait.data<-pheno.data[, ..select_cols]
+trait.data<-pheno.data[,select_cols, with=FALSE]
+
+
+
 
 fam.file<-fread(paste(SNPset,".fam",sep=""))
 fam.file$V6<-NULL

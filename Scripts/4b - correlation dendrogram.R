@@ -13,6 +13,7 @@ prefs<-read.table("Scripts/### Preferences ###",header=F,sep="=",skip=1)
 
 pheno.data<-read.csv(paste("data/",pheno.name,sep=""))
 
+
 ##### data in the colocate plot
 traits<-unique(plot.data$trait)
 attempt <- try(expr = 
