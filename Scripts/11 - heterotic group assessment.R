@@ -39,7 +39,7 @@ Mastershet<-t(Mastershet)[-1,]
 rownames(Mastershet)<- Mastershet[,1]
 colnames(Mastershet)<-c("Trait","GenotypeObs","PhenotypeObs","Covariates","Phenotypes","GenotypeSNPs","PhenotypeSNPs","REMLENULL","MLENULL","PVENull","SEpve","Vkin","Vpop")
 
-Mastershet(Mastershet)
+
 
 #get descriptive statistices for All traits
 ugly<-t(stat.desc(alltraitdata)[,-1])
@@ -49,17 +49,11 @@ All_Descriptive_Statistics<- merge(Mastershet, ugly, by=0, all=TRUE)
 All_Descriptive_Statistics[,3:ncol(All_Descriptive_Statistics)]<-sapply(All_Descriptive_Statistics[,3:ncol(All_Descriptive_Statistics)],as.character)
 All_Descriptive_Statistics[,3:ncol(All_Descriptive_Statistics)]<-sapply(All_Descriptive_Statistics[,3:ncol(All_Descriptive_Statistics)],as.numeric)
 
-#add in h2kin & h2pop
-
-All_Descriptive_Statistics$h2kin<- as.numeric(All_Descriptive_Statistics$Vkin)/(All_Descriptive_Statistics$var)
-
-
-All_Descriptive_Statistics$h2pop<- as.numeric(All_Descriptive_Statistics$Vpop)/(All_Descriptive_Statistics$var)
-
 
 
 write.csv(All_Descriptive_Statistics, paste0(getwd(),"/Tables/Descriptive_Statistics",trait_filename))
 
+View(All_Descriptive_Statistics)
 #read in trait metadata
 
 TRAITMETA<-read.csv(paste0(getwd(),"/data/AllTraitsforGWAS_2020_METADATA.csv"))
@@ -67,28 +61,79 @@ TRAITMETA<-read.csv(paste0(getwd(),"/data/AllTraitsforGWAS_2020_METADATA.csv"))
 View(TRAITMETA)
 #create subsetdata
 
-data<-data.frame(var1=All_Descriptive_Statistics$h2pop,var2=All_Descriptive_Statistics$h2kin,META1=TRAITMETA$META1,META2=TRAITMETA$META2, META3=TRAITMETA$META3)
+data<-data.frame(var1=All_Descriptive_Statistics$PVENull,META1=TRAITMETA$META1,META2=TRAITMETA$META2, META3=TRAITMETA$META3)
 #create labels for graphs
-toplabel<- expression(italic(h)^2~""[POP])
+
 bottomlabel<- expression(italic(h)^2~""[SNP])
  
 
 
 # classic plot :
-p <- ggplot(data, aes(x=var1, y=var2, color=META3)) +
-  geom_point() +
-  xlab(toplabel)+
-  ylab(bottomlabel)+
-   #expand_limits(x=c(0,1.1), y=c(0, 1.1))+
-   coord_fixed(ratio = 1, clip = "off") +
-  theme_minimal()+
-theme(legend.position="right")
 
-p
-# with marginal histogram
-p1 <- ggMarginal(p+theme_classic()+ theme(legend.position = "left"), type="histogram")
+plot_multi_histogram <- function(df, feature, label_column,bottomlabel) {
+  plt <- ggplot(df, aes(x=eval(parse(text=feature)), fill=eval(parse(text=label_column)))) +
+    geom_histogram(alpha=0.7, position="identity", aes(y = ..density..), color="black",bins=50) +
+    geom_density(alpha=0.7) +
+    geom_vline(aes(xintercept=mean(eval(parse(text=feature)))), color="black", linetype="dashed", size=1) +
+    labs(x=bottomlabel, y = "Density")
+  plt + guides(fill=guide_legend(title=label_column))
+  plt + theme_classic()
+}
 
-p1
-p
-cor.test(x=data$var1,y=data$var2)
-  
+plot_multi_histogram(data,"var1","META3",bottomlabel = bottomlabel)
+?ggplot
+
+#read in significant effect sizes
+
+Trait.EffectSIZE.Signif<- read.table("Tables/Colocate/Blocks/traits_to_genomeblocks_signif.txt",header = T)
+
+
+#add metadata column 
+
+Trait.EffectSIZE.Signif.META<-merge(Trait.EffectSIZE.Signif,TRAITMETA, by="trait")
+
+View(Trait.EffectSIZE.Signif.META)
+
+plot_multi_histogram(Trait.EffectSIZE.Signif.META,"PVE","META3",bottomlabel = "Effect Size")
+
+
+#read in suggested effect sizes
+
+
+Trait.EffectSIZE.sugest<- read.table("Tables/Colocate/Blocks/traits_to_genomeblocks_sugest.txt",header = T)
+
+
+#add metadata column 
+
+Trait.EffectSIZE.sugest.META<-merge(Trait.EffectSIZE.sugest,TRAITMETA, by="trait")
+
+View(Trait.EffectSIZE.sugest.META)
+
+plot_multi_histogram(Trait.EffectSIZE.sugest.META,"PVE","META3",bottomlabel = "Effect Size")
+
+
+
+
+
+#plot additive effect size against heritibility
+
+Trait.EffectSIZE.Additive<- read.table("Tables/Colocate/Blocks/PVE.txt",header = T)
+
+
+Trait.EffectSIZE.Additive.meta<-merge(Trait.EffectSIZE.Additive,All_Descriptive_Statistics, by.x = "trait", by.y="Trait")
+
+Trait.EffectSIZE.Additive.meta<-merge(Trait.EffectSIZE.Additive.meta,TRAITMETA,by="trait")
+
+View(Trait.EffectSIZE.Additive.meta)
+
+plot(Trait.EffectSIZE.Additive.meta$common_PVE,Trait.EffectSIZE.Additive.meta$PVENull)
+
+
+
+
+ggplot(Trait.EffectSIZE.Additive.meta, aes(x=common_PVE, y=PVENull,col=META3)) + geom_point() +theme_classic()
+
+
+
+
+
