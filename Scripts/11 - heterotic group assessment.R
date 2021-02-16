@@ -80,8 +80,10 @@ plot_multi_histogram <- function(df, feature, label_column,bottomlabel) {
   plt + theme_classic()
 }
 
-plot_multi_histogram(data,"var1","META3",bottomlabel = bottomlabel)
-?ggplot
+pp<-plot_multi_histogram(data,"var1","META3",bottomlabel = bottomlabel)
+pdf("Plots/Heritibility.pdf")
+pp
+dev.off()
 
 #read in significant effect sizes
 
@@ -130,9 +132,9 @@ plot(Trait.EffectSIZE.Additive.meta$common_PVE,Trait.EffectSIZE.Additive.meta$PV
 
 
 
-
-ggplot(Trait.EffectSIZE.Additive.meta, aes(x=common_PVE, y=PVENull,col=META3)) + geom_point() +theme_classic()
-
+pdf("Plots/Heritibility_V_Effectsize.pdf")
+ggplot(Trait.EffectSIZE.Additive.meta, aes(x=PVENull, y=common_PVE,col=META3)) + geom_point() +theme_classic()
+dev.off()
 
 
 
