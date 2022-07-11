@@ -1,7 +1,7 @@
 #args <- as.numeric(na.exclude(as.numeric(commandArgs())))
 # edit these lines as needed
 ### BEGIN SECTION 1 ###
-trait_filename <- "SAMHPLCRetentiontimes200PlotPeakAreas.csv"
+trait_filename <- "AllTraitsforGWAS_2020.csv"
 
 
 #lapply(c("data.table", "qqman", "tidyverse", "RColorBrewer", "ggpubr", "grid", "ggrepel", "gridExtra", "cowplot", "wesanderson", "corrr", "dplyr", "Hmisc", "ggdendro", "urltools", "scales"),library,character.only=TRUE)
@@ -89,7 +89,14 @@ set_threshold(method = pvalue_cutoff)
   source("Scripts/8 - Show blocks on haplotype map.R")
   cat("\nCompleted Script 8.\n")
 
-
+  cat("\nBeginning Script 9.\n")
+  source("Scripts/9 - Haplotype blocks with associated traits GWAS output table.R")
+  cat("\nCompleted Script 9.\n")
+  
+  cat("\nBeginning Script 10.\n")
+  source("Scripts/10 - Gene Set Enrichment Colocate.R")
+  source("Scripts/10a - Gene Set Enrichment Colocate.R")
+  cat("\nCompleted Script 10.\n")
 
 ### BEGIN APPENDIX 1 ###
 if(FALSE) # change to TRUE to install all required packages

@@ -62,7 +62,8 @@ for (i in 1:length(traits)){
       next
     } ### deal with missing association file
     
-    snips<-fread(paste("Tables/Assoc_files/", paste(traits[i],envs[q],sep="_"), ".assoc.txt", sep=""), header=T)
+    snips<-fread(paste("Tables/Assoc_files/", paste(traits[i],envs[q],sep="_"), ".assoc.txt", sep=""), header="auto")
+   
     
     trait.range<-abs(diff(range(pheno.data[, paste(traits[i],envs[q],sep="_")],na.rm=T)))
 
@@ -125,5 +126,67 @@ for (i in 1:length(traits)){
 
 sig.snips<-unique(sig.snips.save,by="rs")[,1:3]
 
-write.table<-write.table(sig.snips.save, "Tables/Blocks/signif_snps_alltraits.txt", sep="\t", row.names=F, col.names=T)
+write.table<-write.table(sig.snips.save, "Tables/Colocate/Blocks/signif_snps_alltraits.txt", sep="\t", row.names=F)
+
+
+
+#creating a table for the LD size of genome blocks regions
+
+
+
+
+#get a list of hapID from the sig.list
+
+
+SigsnpsHAPids<- unique(sig.list$hapID) 
+
+
+#remove single from the list of names 
+SigsnpsHAPids<-gsub( "single", "", as.character(SigsnpsHAPids))
+
+
+
+#create empty dataframe for results
+Genomeblocksizes<-data.frame()
+
+#take first hapID
+#subset big list by hapID
+for (i in 1:length(SigsnpsHAPids)) {
+  
+
+   
+
+SNPsinHAPid<-subset(big.list,big.list$hapID==SigsnpsHAPids[i])
+
+SNPsinRegion<-subset(sig.list,sig.list$hapID==SigsnpsHAPids[i])
+
+SNPregions<-unique(SNPsinRegion$region)
+#delete everything before  : in SNP column 
+
+
+DID<-as.data.frame(strsplit(SNPsinHAPid$SNP,split=":",fixed=T))
+   
+
+#take the range of the BP and convert it to KB
+KB<-(as.numeric(DID[2,ncol(DID)])-as.numeric(DID[2,1]))*0.001
+START<-as.numeric(DID[2,1])
+  END<-as.numeric(DID[2,ncol(DID)])
+  
+  NumberofsigSNPS<-dim(SNPsinRegion)[1]
+
+   for (j in 1:length(SNPregions)) {
+     Datatoadd<-c(as.character(SigsnpsHAPids[i]),NumberofsigSNPS,START,END,KB,as.character(SNPregions[j]))
+     Genomeblocksizes<-rbind(Genomeblocksizes,Datatoadd)
+   }}
+
+
+
+
+colnames(Genomeblocksizes)<-c("GenomeHAPID", "NumberofSigSNPs","START","STOP","KBsize","SigsnpHAPID")
+
+write.csv(Genomeblocksizes,"Tables/Colocate/Blocks/Genomeblocksizes.csv")
+
+
+View(Genomeblocksizes)
+
 

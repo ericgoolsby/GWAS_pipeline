@@ -40,7 +40,7 @@ for (i in 1:length(traits)){
   for (q in 1:length(envs)){
     
       
-      snips<-fread(paste("Tables/Assoc_files/",paste(traits[i],envs[q],sep="_"),".assoc.txt",sep=""),header=T)
+      snips<-fread(paste("Tables/Assoc_files/",paste(traits[i],envs[q],sep="_"),".assoc.txt",sep=""))
       
       ##### bit that makes the plot
       pvalue <- snips$p_wald

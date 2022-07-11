@@ -23,10 +23,10 @@ envs<-as.character(read.table("environments_to_run.txt")[,1])
 
 
 
-sig.blocks<-read.table("Tables/Blocks/traits_to_genomeblocks_signif.txt", header=T)
-sug.blocks<-read.table("Tables/Blocks/traits_to_genomeblocks_sugest.txt", header=T)
-sig.list<-read.table("Tables/Blocks/sigsnips_to_genomeblocks.txt",header=T)
-sighap_to_genomehap<-read.table("Tables/Blocks/condensed_genome_blocks.txt",header=T)
+sig.blocks<-read.table("Tables/Colocate/Blocks/traits_to_genomeblocks_signif.txt", header=T)
+sug.blocks<-read.table("Tables/Colocate/Blocks/traits_to_genomeblocks_sugest.txt", header=T)
+sig.list<-read.table("Tables/Colocate/Blocks/sigsnips_to_genomeblocks.txt",header=T)
+sighap_to_genomehap<-read.table("Tables/Colocate/Blocks/condensed_genome_blocks.txt",header=T)
 
 #### set up data to feed into plotting
 colocate<-rbind(sig.blocks,sug.blocks[sug.blocks$hapID%in%sig.blocks$hapID,])
@@ -128,7 +128,7 @@ for (i in 1: length(unique(colocate$chromosome))) {
   
   chrom.plot<-plot_grid(dendro.plot,trait.plot,ncol=2,rel_widths = c(3,region.count),align="v")
  # ggsave(paste("Plots/Colocalization/colocate-chromosome-",unique(colocate$chromosome)[i],".pdf",sep=""),plot=chrom.plot,width=6,height=16)
-  pdf(paste("Plots/Colocalization/colocate-chromosome-",unique(colocate$chromosome)[i],".pdf",sep=""),width=6,height=16)
+  pdf(paste("Plots/Colocalization/Dendrograms/colocate-chromosome-",unique(colocate$chromosome)[i],".pdf",sep=""),width=6,height=16)
   print(chrom.plot)
   dev.off()
   

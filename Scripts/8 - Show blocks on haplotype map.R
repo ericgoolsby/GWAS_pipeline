@@ -45,8 +45,8 @@ prefs<-read.table("Scripts/### Preferences ###",header=F,sep="=",skip=1)
 ##### Identify blocks with significant snps
       
       #######
-      sig.list<-read.table("Tables/Blocks/sigsnips_to_genomeblocks.txt",header=T)
-      genemap<-read.table("Tables/Blocks/condensed_genome_blocks.txt",header=T)
+      sig.list<-read.table("Tables/Colocate/Blocks/sigsnips_to_genomeblocks.txt",header=T)
+      genemap<-read.table("Tables/Colocate/Blocks/condensed_genome_blocks.txt",header=T)
       # colocate<-read.table("Tables/Blocks/colocate_table.txt")
       genemap$colocate.block<-genemap$colocate.region #rename
       
@@ -86,7 +86,7 @@ blockmap<-plotbase+theme_minimal()+
 
 #ggsave("Plots/Colocalization/regions_on_blockmap.pdf",blockmap, width=14.24, height=7.6)
 
-pdf("Plots/Colocalization/regions_on_blockmap.pdf", width=14.24, height=7.6)
+pdf("Plots/Colocalization/ChromosomeLD/regions_on_blockmap.pdf", width=14.24, height=7.6)
 blockmap
 dev.off()
 

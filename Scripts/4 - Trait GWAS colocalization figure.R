@@ -14,10 +14,10 @@ colors<-c("#1b9e77", "gray85")
 
 envs<-as.character(read.table("environments_to_run.txt")[,1])
 
-sig.blocks<-read.table("Tables/Blocks/traits_to_genomeblocks_signif.txt", header=T)
-sug.blocks<-read.table("Tables/Blocks/traits_to_genomeblocks_sugest.txt", header=T)
-sig.list<-read.table("Tables/Blocks/sigsnips_to_genomeblocks.txt",header=T)
-sighap_to_genomehap<-read.table("Tables/Blocks/condensed_genome_blocks.txt",header=T)
+sig.blocks<-read.table("Tables/Colocate/Blocks/traits_to_genomeblocks_signif.txt", header=T)
+sug.blocks<-read.table("Tables/Colocate/Blocks/traits_to_genomeblocks_sugest.txt", header=T)
+sig.list<-read.table("Tables/Colocate/Blocks/sigsnips_to_genomeblocks.txt",header=T)
+sighap_to_genomehap<-read.table("Tables/Colocate/Blocks/condensed_genome_blocks.txt",header=T)
 
 #### set up data to feed into plotting
 colocate<-rbind(sig.blocks,sug.blocks[sug.blocks$hapID%in%sig.blocks$hapID,])
@@ -34,7 +34,7 @@ colocate<- colocate %>% mutate(beta.sign=sign(beta))
 
 colocate$region<-factor(colocate$region)
 
-write.table(colocate,"Tables/Blocks/colocate_table.txt")
+write.table(colocate,"Tables/Colocate/Blocks/colocate_table.txt")
 
 ############## function that helps with settting a region as significant if it's only significant for one of it's component genome haplotype blocks
 sig.sug.fun<-function (x) {
@@ -62,10 +62,10 @@ chrom.borders<-chrom.borders[1:length(chrom.borders)-1]
 colocate<-colocate[!duplicated(paste(colocate$region,colocate$trait_env)),]
 
 
-for (i in 1:length(envs)) {
-  q<-i
+for (q in 1:length(envs)) {
+ 
 
-plot.data<-as.data.frame(colocate[colocate$env==envs[i],])
+plot.data<-as.data.frame(colocate[colocate$env==envs[q],])
 
 source("Scripts/4b - correlation dendrogram.R") ### update script referal after changing names
 
@@ -88,20 +88,45 @@ plot.colocate<- baseplot+geom_vline(xintercept=c(1:length(plot.data$region)),col
   scale_x_discrete(drop=F)+
   theme_classic()+
   theme(axis.title.y=element_blank(),axis.text.x = element_text(angle = 90, vjust = 0.5,hjust=1))+
-  ggtitle(envs[i])+theme(legend.position = "none")+theme(axis.title.x=element_blank())
+  ggtitle(envs[q])+theme(legend.position = "none")+theme(axis.title.x=element_blank())
 
 # plot.data.dendro<-plot.data.dendro+coord_flip(xlim=c(4,length(plot.data.label.order)-4))+
 #   theme(axis.text.x=element_text(size=8))+theme(axis.title.x=element_blank())
 
-comb.plot<-plot_grid(Env.dendro+theme(plot.margin = unit(c(0, 0, 0, 0), "cm")),
-                     plot.colocate+theme(plot.margin = unit(c(0, 0, 0, 0), "cm")),
-                     align="h",rel_widths=c(1,9))
+#comb.plot<-plot_grid(Env.dendro+theme(plot.margin = unit(c(0, 0, 0, 0), "cm")),
+ #                    plot.colocate+theme(plot.margin = unit(c(0, 0, 0, 0), "cm")),
+  #                   align="h",rel_widths=c(1,9))
 
-trait.to.region.ratio<-length(levels(plot.data$region))/length(Env.label.order)
+#trait.to.region.ratio<-length(levels(plot.data$region))/length(Env.label.order)
+
+Env.dendro<-Env.dendro+theme(axis.text.x = element_text(angle = 90, vjust = 0.5,hjust=1,size=8))+ggtitle(" ")+theme(plot.margin = unit(c(0.2, 0, 0, 0), "cm"))
+
+
+
+assign(paste(envs[q]),plot.colocate)
+assign(paste(envs[q],"_dendro",sep=""),Env.dendro)
+
+trait.count[q]<-length(Env.label.order)
+
+trait.count<-c(seq(from=1,to=length(trait.count),1))
+
+#trait.plot.list<- as.list(paste(envs[1:length(envs)],"firstplot",sep=""))
+trait.plot.list <-mget(paste(envs[1:length(envs)]))
+
+trait.plot<-plot_grid(plotlist = trait.plot.list,align="v",nrow=1,rel_heights=trait.count+2.5)
+
+#dendro.plot.list<- as.list(paste(envs[1:length(envs)],"_dendro",sep=""))
+
+dendro.plot.list<-mget(paste(envs[1:length(envs)],"_dendro",sep=""))
+
+dendro.plot<-plot_grid(plotlist = dendro.plot.list[1:length(trait.plot.list)],align="v",nrow=1,rel_heights=trait.count+2.5)
+
+comb.plot<-plot_grid(dendro.plot,trait.plot,ncol=2,rel_widths = c(3,region.count),align="v")
+
 
 #ggsave(paste("Plots/Colocalization/colocate-",envs[i],".pdf",sep=""),plot=comb.plot,width=22,height=6)
-pdf(paste("Plots/Colocalization/colocate-",envs[i],".png",sep=""),width=22,height=6)
-comb.plot
+pdf(paste("Plots/Colocalization/Dendrograms/colocate-",envs[q],".pdf",sep=""),width=22,height=6)
+print(comb.plot)
 dev.off()
 
 

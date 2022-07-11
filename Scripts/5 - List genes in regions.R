@@ -80,11 +80,11 @@ mrna$attributes<-NULL
     big.list<-rbind(big.list,missing.snps)
 
 #######
-sig.list<-read.table("Tables/Blocks/sigsnips_to_genomeblocks.txt",header=T)
-genemap<-read.table("Tables/Blocks/condensed_genome_blocks.txt",header=T)
-colocate<-read.table("Tables/Blocks/colocate_table.txt")
+sig.list<-read.table("Tables/Colocate/Blocks/sigsnips_to_genomeblocks.txt",header=T)
+genemap<-read.table("Tables/Colocate/Blocks/condensed_genome_blocks.txt",header=T)
+colocate<-read.table("Tables/Colocate/Blocks/colocate_table.txt")
 genemap$colocate.block<-genemap$colocate.region #rename
-sig.snips<-read.table("Tables/Blocks/signif_snps_alltraits.txt")
+sig.snips<-read.table("Tables/Colocate/Blocks/signif_snps_alltraits.txt")
 
 
 ### add colocate block name to block key
@@ -122,7 +122,7 @@ for (i in 1:length(genemap$genome.hap)) {
   }
   if(sum(chrom.mrna$start>genemap$start[i]&chrom.mrna$end<genemap$stop[i])==0) {
       single.snp.genes<-unique(c(last(which(chrom.mrna$start<genemap$start[i])),
-                                  first(which(chrom.mrna$end>genemap$stop[i]))))
+                                  dplyr::first(which(chrom.mrna$end>genemap$stop[i]))))
       genemap$nr.genes[i]<-length(single.snp.genes)
       block.mrna<-chrom.mrna[single.snp.genes, ]
   }
@@ -139,16 +139,26 @@ for (i in 1:length(genemap$genome.hap)) {
 gene.list$sig.hap<-genemap$sig.hap[match(gene.list$genome.hap,genemap$genome.hap)]
 gene.list$colocate.block<-genemap$colocate.block[match(gene.list$genome.hap,genemap$genome.hap)]
 
-gene.list<-gene.list %>% group_by(colocate.block) %>% group_by (locus_tag) %>% slice(1) ## remove duplicate genes from singif snps block
+gene.list<-gene.list %>% group_by(colocate.block) %>% group_by (locus_tag) %>% dplyr::slice(1) ## remove duplicate genes from singif snps block
 
 gene.list<-gene.list[,c(13,1:12)] #shuffle columns for saving
+
+
 
 
 ##### add traits for which the block is significant
 
 
 
-write.csv(gene.list,"Tables/Genes/genelist.csv")
+write.csv(gene.list,"Tables/Colocate/Genes/Global_genelist.csv")
+#save globalGO terms for later analysis 
+
+GO.list <- sapply(gene.list, as.character)
+GO.list[is.na(GO.list)] <- ""
+
+write.table(GO.list[,c("locus_tag","Ontology_term")], file=paste("Tables/Colocate/Genes/ColocateGO/GO_global.txt", sep=""),col.names=FALSE, row.names = FALSE, sep="\t" )  
+
+#View(head(gene.list))
 
 ### plot region gene sizes
 
@@ -173,12 +183,16 @@ genes.plot<-plotbase+geom_point(shape=21,col="gray",size=2)+
 
 #ggsave("Plots/Colocalization/nr_genes.pdf",genes.plot, width=18, height=10)
 
-pdf("Plots/Colocalization/nr_genes.pdf", width=18, height=10)
+pdf("Plots/Colocalization/Dendrograms/nr_genes.pdf", width=18, height=10)
 genes.plot
 dev.off()
 
 
 
+write.csv(gene.count,"Tables/Colocate/Genes/genecount.csv")
 
 
-write.csv(gene.count,"Tables/Genes/genecount.csv")
+
+
+
+

@@ -1,5 +1,5 @@
 ###### file names and preferences for the sunflower GWAS pipeline v2 ########
-phenotype file="replace1"
+phenotype file="AllTraitsforGWAS_2020_for_pipeline.csv"
 SNP files name="XRQv1_412_261_filtered"
-Multcomp correction value="50"
+Multcomp correction value="19918"
 
